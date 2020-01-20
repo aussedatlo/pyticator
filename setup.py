@@ -16,4 +16,8 @@ setup(
         'configparser >= 3.7.0',
         'crypto >= 1.25.7',
     ],
+    data_files=[(
+        '/etc/pyticator/',
+        ['config/pyticator.conf']
+    )],
 )
