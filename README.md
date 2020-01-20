@@ -16,3 +16,12 @@ bin/pyticator-client localhost
 ```
 python3 setup.py build install --user
 ```
+
+## Testing pyticator
+
+with python coverage, run the following command:
+
+```
+coverage run -m unittest
+coverage report -m
+```
