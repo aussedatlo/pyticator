@@ -7,7 +7,7 @@ __author__ = "Louis Aussedat"
 __copyright__ = "Copyright (c) 2019 Louis Aussedat"
 __license__ = "GPLv3"
 
-class thread_generate_code(threading.Thread):
+class thread_codeGenerator(threading.Thread):
     """Class thread that generate random code"""
     def __init__(self):
         threading.Thread.__init__(self)

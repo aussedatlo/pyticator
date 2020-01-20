@@ -6,7 +6,7 @@ import socket
 import argparse
 import hashlib
 import sys
-import pyticator.rsa_crypt as rsa_crypt
+import pyticator.rsaWrapper as rsaWrapper
 import pyticator.exceptions as exceptions
 import pyticator.configReader as configReader
 
@@ -49,13 +49,13 @@ def main(argv):
 
     # generate keys
     if args.generate:
-        rsa_crypt.generate_keys(pub_key_file=args.pub_key_file, priv_key_file=args.priv_key_file)
+        rsaWrapper.generate_keys(pub_key_file=args.pub_key_file, priv_key_file=args.priv_key_file)
         sys.exit(0)
 
     # check if key exist and load them
     check_key(args.priv_key_file)
     check_key(args.pub_key_file)
-    private = rsa_crypt.load_private_key(args.priv_key_file)
+    private = rsaWrapper.load_private_key(args.priv_key_file)
 
     # create socket
     logging.info("connectiong to %s:%s" % (args.host, args.port))
@@ -64,14 +64,14 @@ def main(argv):
     sock.settimeout(10)
 
     # send hello message encrypted with public key
-    message = rsa_crypt.sign(private, "Hello".encode())
+    message = rsaWrapper.sign(private, "Hello".encode())
     logging.debug(" sending sign hello message: %s" % message)
-    # encoded = rsa_crypt.encrypt_private_key(message, public)
+    # encoded = rsaWrapper.encrypt_private_key(message, public)
     sock.send(message)
 
     # wait for response
     response = sock.recv(2048)
-    response_decrypt = rsa_crypt.decrypt_private_key(response, private)
+    response_decrypt = rsaWrapper.decrypt_private_key(response, private)
 
     logging.info(" code is %s" % response_decrypt.decode())
 

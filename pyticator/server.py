@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import pyticator.rsaWrapper as rsaWrapper
-import pyticator.generate_code as generate_code
+import pyticator.codeGenerator as codeGenerator
 import pyticator.exceptions as exceptions
 import pyticator.configReader as configReader
 from pathlib import Path
@@ -22,8 +22,8 @@ class Server:
         self.port = port
         self.array_keys = []
 
-        self.thread_generate_code = generate_code.thread_generate_code()
-        self.thread_generate_code.start()
+        self.thread_codeGenerator = codeGenerator.thread_codeGenerator()
+        self.thread_codeGenerator.start()
 
         # Create socket
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -48,7 +48,7 @@ class Server:
 
     def signal_handler(self, sig, frame):
         logging.info(" SIGINT reicive, closing...")
-        self.thread_generate_code.stop_tread()
+        self.thread_codeGenerator.stop_tread()
         self.sock.close()
         sys.exit(0)
 
@@ -62,7 +62,7 @@ class Server:
             if message != "":
                 if self._check_message(message):
                     logging.info(" accepted key for user %s", address)
-                    code, validity = self.thread_generate_code.get_code()
+                    code, validity = self.thread_codeGenerator.get_code()
                     response = str(code) + ":" + str(validity)
                     send = rsaWrapper.encrypt_public_key(response.encode(), self.key)
                     self._send_message(client, send)
