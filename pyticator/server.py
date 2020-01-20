@@ -3,6 +3,7 @@
 import pyticator.rsa_crypt as rsa_crypt
 import pyticator.generate_code as generate_code
 import pyticator.exceptions as exceptions
+import pyticator.configReader as configReader
 from pathlib import Path
 import logging
 import socket
@@ -71,21 +72,21 @@ class Server:
 def main(argv):
     # Parse arguments
     parser = argparse.ArgumentParser(argv)
-    parser.add_argument("--pub", help="public key file", default="/etc/pyticator/id_rsa.pub")
-    parser.add_argument("-p", "--port", help="port", type=int, default="8852")
+    parser.add_argument("--pub_key_file", help="public key file")
+    parser.add_argument("-p", "--port", help="port", type=int)
     parser.add_argument("-d", "--debug", help="debug mode",
                     action="store_true")
     args = parser.parse_args()
+    args = configReader.get("/etc/pyticator/pyticator.conf", "server", args)
 
     # Logger mode
-    if args.debug:
-        logging_level = logging.DEBUG
+    if args.debug != "0" and args.debug != None:
+        logging.basicConfig(level=logging.DEBUG, format="%(asctime)s:%(levelname)s:%(message)s", datefmt="%H:%M:%S")
+        logging.info("args: %s" % args)
     else:
-        logging_level = logging.INFO
+        logging.basicConfig(level=logging.INFO, format="%(asctime)s:%(levelname)s:%(message)s", datefmt="%H:%M:%S")
 
-    logging.basicConfig(level=logging_level, format="%(asctime)s:%(levelname)s:%(message)s", datefmt="%H:%M:%S")
-
-    server = Server(args.pub, args.port)
+    server = Server(args.pub_key_file, int(args.port))
     # Handle SIGINT interrupt
     signal.signal(signal.SIGINT, server.signal_handler)
     server.start()

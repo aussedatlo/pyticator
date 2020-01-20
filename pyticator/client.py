@@ -8,6 +8,7 @@ import hashlib
 import sys
 import pyticator.rsa_crypt as rsa_crypt
 import pyticator.exceptions as exceptions
+import pyticator.configReader as configReader
 
 __author__ = "Louis Aussedat"
 __copyright__ = "Copyright (c) 2019 Louis Aussedat"
@@ -23,21 +24,24 @@ def check_key(key_file):
 def main(argv):
     # parse arguments
     parser = argparse.ArgumentParser(argv)
-    parser.add_argument("host", help="host")
-    parser.add_argument("--priv", help="private key file", default="/etc/pyticator/id_rsa")
-    parser.add_argument("--pub", help="public key file", default="/etc/pyticator/id_rsa.pub")
-    parser.add_argument("-p", "--port", help="port", type=int, default="8852")
+    parser.add_argument("--host", help="host")
+    parser.add_argument("--priv_key_file", help="private key file")
+    parser.add_argument("--pub_key_file", help="public key file")
+    parser.add_argument("-p", "--port", help="port", type=int)
     parser.add_argument("-d", "--debug", help="debug mode",
         action="store_true")
     parser.add_argument("-g", "--generate", help="generate keys",
         action="store_true")
     args = parser.parse_args()
 
+    args = configReader.get("/etc/pyticator/pyticator.conf", "client", args)
+
     # Logger mode
-    if args.debug:
-        logging_level = logging.DEBUG
+    if args.debug != "0" and args.debug != None:
+        logging.basicConfig(level=logging.DEBUG, format="%(asctime)s:%(levelname)s:%(message)s", datefmt="%H:%M:%S")
+        logging.info("args: %s" % args)
     else:
-        logging_level = logging.INFO
+        logging.basicConfig(level=logging.INFO, format="%(asctime)s:%(levelname)s:%(message)s", datefmt="%H:%M:%S")
 
     logging.basicConfig(level=logging_level,
         format="%(asctime)s:%(levelname)s:%(message)s",
@@ -45,17 +49,18 @@ def main(argv):
 
     # generate keys
     if args.generate:
-        rsa_crypt.generate_keys(pub_key_file=args.pub, priv_key_file=args.priv)
+        rsa_crypt.generate_keys(pub_key_file=args.pub_key_file, priv_key_file=args.priv_key_file)
         sys.exit(0)
 
     # check if key exist and load them
-    check_key(args.priv)
-    check_key(args.pub)
-    private = rsa_crypt.load_private_key(args.priv)
+    check_key(args.priv_key_file)
+    check_key(args.pub_key_file)
+    private = rsa_crypt.load_private_key(args.priv_key_file)
 
     # create socket
+    logging.info("connectiong to %s:%s" % (args.host, args.port))
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.connect((args.host, args.port))
+    sock.connect((args.host, int(args.port)))
     sock.settimeout(10)
 
     # send hello message encrypted with public key
