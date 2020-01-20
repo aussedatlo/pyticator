@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import pyticator.rsa_crypt as rsa_crypt
+import pyticator.rsaWrapper as rsaWrapper
 import pyticator.generate_code as generate_code
 import pyticator.exceptions as exceptions
 import pyticator.configReader as configReader
@@ -30,7 +30,7 @@ class Server:
         self.sock.bind(('', port))
 
         # Get pub key
-        self.key = rsa_crypt.load_public_key(pub_key_file)
+        self.key = rsaWrapper.load_public_key(pub_key_file)
 
     def _send_message(self, client, message):
         try:
@@ -41,7 +41,7 @@ class Server:
 
     def _check_message(self, message):
         logging.debug(" checking message ! : %s" % message.hex())
-        verify = rsa_crypt.verify_sign(self.key, message, "Hello".encode())
+        verify = rsaWrapper.verify_sign(self.key, message, "Hello".encode())
         if not verify:
             logging.error(" error key not reconized")
         return verify
@@ -64,7 +64,7 @@ class Server:
                     logging.info(" accepted key for user %s", address)
                     code, validity = self.thread_generate_code.get_code()
                     response = str(code) + ":" + str(validity)
-                    send = rsa_crypt.encrypt_public_key(response.encode(), self.key)
+                    send = rsaWrapper.encrypt_public_key(response.encode(), self.key)
                     self._send_message(client, send)
                 else:
                     logging.error(" refusing connexion for user %s", address)
