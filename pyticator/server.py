@@ -30,7 +30,7 @@ class Server:
         self.sock.bind(('', port))
 
         # Get pub key
-        self.key = rsaWrapper.load_public_key(pub_key_file)
+        self.key = rsaWrapper.load_key(pub_key_file)
 
     def _send_message(self, client, message):
         try:

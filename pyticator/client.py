@@ -55,7 +55,7 @@ def main(argv):
     # check if key exist and load them
     check_key(args.priv_key_file)
     check_key(args.pub_key_file)
-    private = rsaWrapper.load_private_key(args.priv_key_file)
+    private = rsaWrapper.load_key(args.priv_key_file)
 
     # create socket
     logging.info("connectiong to %s:%s" % (args.host, args.port))

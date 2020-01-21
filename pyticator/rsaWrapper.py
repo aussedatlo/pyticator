@@ -25,15 +25,7 @@ def generate_keys(pub_key_file, priv_key_file):
     f.write(pub_key.exportKey().decode())
     f.close()
 
-def load_private_key(priv_key_file):
-    """load private key from file"""
-    f = open(priv_key_file, "r")
-    key = f.read()
-    f.close()
-    key = RSA.importKey(key.encode())
-    return key
-
-def load_public_key(pub_key_file):
+def load_key(pub_key_file):
     """load public key from file"""
     f = open(pub_key_file, "r")
     key = f.read()
