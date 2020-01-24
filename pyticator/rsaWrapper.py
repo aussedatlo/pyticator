@@ -69,7 +69,7 @@ def verify_sign(pub_key, signature, data):
     return False
 
 def sign(priv_key, data):
-    """Sign data with public key"""
+    """Sign data with private key"""
     signer = PKCS1_v1_5.new(priv_key)
     digest = SHA256.new()
     digest.update(data)
