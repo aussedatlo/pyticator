@@ -46,7 +46,7 @@ class Server:
             log.error(" error key not reconized")
         return verify
 
-    def signal_handler(self, sig, frame):
+    def _signal_handler(self, sig, frame):
         log.info(" SIGINT reicive, closing...")
         self.thread_code_generator.stop_tread()
         self.sock.close()
@@ -84,7 +84,7 @@ def main(argv):
 
     server = Server(args.pub_key_file, int(args.port))
     # Handle SIGINT interrupt
-    signal.signal(signal.SIGINT, server.signal_handler)
+    signal.signal(signal.SIGINT, server._signal_handler)
     server.start()
 
 def exec_command_line(argv):
