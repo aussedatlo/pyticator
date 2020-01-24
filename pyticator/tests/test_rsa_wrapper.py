@@ -1,6 +1,6 @@
 import unittest
 from os import path
-from pyticator.rsa_crypt import generate_keys, load_public_key
+from pyticator.rsaWrapper import generate_keys, load_key
 from Crypto.PublicKey import RSA
 
 PUB_KEY_FILE = "/tmp/key_file.pub"
@@ -41,12 +41,16 @@ class RsaWrapperTest(unittest.TestCase):
         assert "-----BEGIN RSA PRIVATE KEY-----" in lines[0]
         assert "-----END RSA PRIVATE KEY-----" in lines[-1]
 
-
-    def test_load_public_key(self):
+    def test_load_key(self):
         """test load"""
-        self.assertRaises(IndexError, load_public_key, EMPTY_FILE)
-        self.assertRaises(ValueError, load_public_key, FALSE_FILE)
+        self.assertRaises(IndexError, load_key, EMPTY_FILE)
+        self.assertRaises(ValueError, load_key, FALSE_FILE)
+        self.assertRaises(IndexError, load_key, EMPTY_FILE)
+        self.assertRaises(ValueError, load_key, FALSE_FILE)
 
-        key = load_public_key(PUB_KEY_FILE)
+        key = load_key(PUB_KEY_FILE)
+        assert type(key) is RSA._RSAobj
+
+        key = load_key(PRIV_KEY_FILE)
         assert type(key) is RSA._RSAobj
 
