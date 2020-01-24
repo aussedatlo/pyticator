@@ -1,5 +1,3 @@
-
-
 __author__ = "Louis Aussedat"
 __copyright__ = "Copyright (c) 2019 Louis Aussedat"
 __license__ = "GPLv3"
@@ -13,3 +11,4 @@ class KeyNotFound(Error):
 
     def __init__(self, message):
         self.message = message
+

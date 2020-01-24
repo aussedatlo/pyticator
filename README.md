@@ -1,18 +1,24 @@
 # pyticator
 
-## Server
+Two-factor Authentication Python module
+
+## Setup
 
 ```
-bin/pyticator-server
+python3 setup.py build install
+sudo mkdir /etc/pyticator
+sudo cp ./config/pyticator.conf /etc/pyticator/pyticator.conf
+```
+
+## Start Server
+
+```
+pyticator-server
 ```
 
 
-## Client
-```
-bin/pyticator-client localhost
-```
+## Start Client
 
-## Build and install
 ```
-python3 setup.py build install --user
+pyticator-client
 ```

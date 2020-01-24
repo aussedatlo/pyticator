@@ -1,14 +1,12 @@
 #!/usr/bin/env python3
 
+from ..common import rsa, exceptions, config_reader
 from pathlib import Path
 import logging
 import socket
 import argparse
 import hashlib
 import sys
-import pyticator.rsa_crypt as rsa_crypt
-import pyticator.exceptions as exceptions
-import pyticator.configReader as configReader
 
 __author__ = "Louis Aussedat"
 __copyright__ = "Copyright (c) 2019 Louis Aussedat"
@@ -34,7 +32,7 @@ def main(argv):
         action="store_true")
     args = parser.parse_args()
 
-    args = configReader.get("/etc/pyticator/pyticator.conf", "client", args)
+    args = config_reader.get("/etc/pyticator/pyticator.conf", "client", args)
 
     # Logger mode
     if args.debug != "0" and args.debug != None:
@@ -43,19 +41,15 @@ def main(argv):
     else:
         logging.basicConfig(level=logging.INFO, format="%(asctime)s:%(levelname)s:%(message)s", datefmt="%H:%M:%S")
 
-    logging.basicConfig(level=logging_level,
-        format="%(asctime)s:%(levelname)s:%(message)s",
-        datefmt="%H:%M:%S")
-
     # generate keys
     if args.generate:
-        rsa_crypt.generate_keys(pub_key_file=args.pub_key_file, priv_key_file=args.priv_key_file)
+        rsa.generate_keys(pub_key_file=args.pub_key_file, priv_key_file=args.priv_key_file)
         sys.exit(0)
 
     # check if key exist and load them
     check_key(args.priv_key_file)
     check_key(args.pub_key_file)
-    private = rsa_crypt.load_private_key(args.priv_key_file)
+    private = rsa.load_key(args.priv_key_file)
 
     # create socket
     logging.info("connectiong to %s:%s" % (args.host, args.port))
@@ -64,14 +58,14 @@ def main(argv):
     sock.settimeout(10)
 
     # send hello message encrypted with public key
-    message = rsa_crypt.sign(private, "Hello".encode())
+    message = rsa.sign(private, "Hello".encode())
     logging.debug(" sending sign hello message: %s" % message)
-    # encoded = rsa_crypt.encrypt_private_key(message, public)
+    # encoded = rsa.encrypt_private_key(message, public)
     sock.send(message)
 
     # wait for response
     response = sock.recv(2048)
-    response_decrypt = rsa_crypt.decrypt_private_key(response, private)
+    response_decrypt = rsa.decrypt_private_key(response, private)
 
     logging.info(" code is %s" % response_decrypt.decode())
 

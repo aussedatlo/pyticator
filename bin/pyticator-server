@@ -4,8 +4,8 @@ __author__ = "Louis Aussedat"
 __copyright__ = "Copyright (c) 2019 Louis Aussedat"
 __license__ = "GPLv3"
 
-from pyticator.server import exec_command_line
+from pyticator.server import server
 import sys
 
 if __name__ == "__main__":
-	exec_command_line(sys.argv)
+	server.exec_command_line(sys.argv)
