@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from . import code_generator
-from ..common import rsa, config_reader
+from ..common import rsa, config_reader, logger
 from pathlib import Path
 import logging
 import socket
@@ -13,6 +13,8 @@ import sys
 __author__ = "Louis Aussedat"
 __copyright__ = "Copyright (c) 2019 Louis Aussedat"
 __license__ = "GPLv3"
+
+log = logger.setup_logger(__name__, logging.INFO)
 
 class Server:
     def __init__(self, pub_key_file, port):
@@ -33,19 +35,19 @@ class Server:
     def _send_message(self, client, message):
         try:
             client.send(message)
-            logging.debug(" message sending ok")
+            log.debug(" message sending ok")
         except:
-            logging.error(" message sending error")
+            log.error(" message sending error")
 
     def _check_message(self, message):
-        logging.debug(" checking message ! : %s" % message.hex())
+        log.debug(" checking message: %s" % message.hex())
         verify = rsa.verify_sign(self.key, message, "Hello".encode())
         if not verify:
-            logging.error(" error key not reconized")
+            log.error(" error key not reconized")
         return verify
 
     def signal_handler(self, sig, frame):
-        logging.info(" SIGINT reicive, closing...")
+        log.info(" SIGINT reicive, closing...")
         self.thread_code_generator.stop_tread()
         self.sock.close()
         sys.exit(0)
@@ -54,18 +56,18 @@ class Server:
         while True:
             self.sock.listen(5)
             client, address = self.sock.accept()
-            logging.debug(" connected by %s", address)
+            log.debug(" connected by %s", address)
 
             message = client.recv(256)
             if message != "":
                 if self._check_message(message):
-                    logging.info(" accepted key for user %s", address)
+                    log.info(" accepted key for user %s", address)
                     code, validity = self.thread_code_generator.get_code()
                     response = str(code) + ":" + str(validity)
                     send = rsa.encrypt_public_key(response.encode(), self.key)
                     self._send_message(client, send)
                 else:
-                    logging.error(" refusing connexion for user %s", address)
+                    log.error(" refusing connexion for user %s", address)
 
 def main(argv):
     # Parse arguments
@@ -77,12 +79,8 @@ def main(argv):
     args = parser.parse_args()
     args = config_reader.get("/etc/pyticator/pyticator.conf", "server", args)
 
-    # Logger mode
-    if args.debug != "0" and args.debug != None:
-        logging.basicConfig(level=logging.DEBUG, format="%(asctime)s:%(levelname)s:%(message)s", datefmt="%H:%M:%S")
-        logging.info("args: %s" % args)
-    else:
-        logging.basicConfig(level=logging.INFO, format="%(asctime)s:%(levelname)s:%(message)s", datefmt="%H:%M:%S")
+    if args.debug != '0':
+        log.setLevel(logging.DEBUG)
 
     server = Server(args.pub_key_file, int(args.port))
     # Handle SIGINT interrupt

@@ -1,22 +1,23 @@
 #!/usr/bin/env python3
 
-from ..common import rsa, exceptions, config_reader
+from ..common import rsa, exceptions, config_reader, logger
 from pathlib import Path
-import logging
 import socket
 import argparse
 import hashlib
 import sys
+import logging
 
 __author__ = "Louis Aussedat"
 __copyright__ = "Copyright (c) 2019 Louis Aussedat"
 __license__ = "GPLv3"
 
+log = logger.setup_logger(__name__, logging.INFO)
+
 def check_key(key_file):
-    logging.debug(" checking key: %s" % key_file)
     key_file = Path(key_file)
     if not key_file.is_file():
-        logging.error(" file not found")
+        log.error("file %s not found" % key_file)
         raise exceptions.KeyNotFound("key file %s not found" % key_file)
 
 def main(argv):
@@ -34,12 +35,8 @@ def main(argv):
 
     args = config_reader.get("/etc/pyticator/pyticator.conf", "client", args)
 
-    # Logger mode
-    if args.debug != "0" and args.debug != None:
-        logging.basicConfig(level=logging.DEBUG, format="%(asctime)s:%(levelname)s:%(message)s", datefmt="%H:%M:%S")
-        logging.info("args: %s" % args)
-    else:
-        logging.basicConfig(level=logging.INFO, format="%(asctime)s:%(levelname)s:%(message)s", datefmt="%H:%M:%S")
+    if args.debug != '0':
+        log.setLevel(logging.DEBUG)
 
     # generate keys
     if args.generate:
@@ -52,14 +49,14 @@ def main(argv):
     private = rsa.load_key(args.priv_key_file)
 
     # create socket
-    logging.info("connectiong to %s:%s" % (args.host, args.port))
+    log.info("connecting to %s:%s" % (args.host, args.port))
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.connect((args.host, int(args.port)))
     sock.settimeout(10)
 
     # send hello message encrypted with public key
     message = rsa.sign(private, "Hello".encode())
-    logging.debug(" sending sign hello message: %s" % message)
+    log.debug("sending sign hello message: %s" % message.hex())
     # encoded = rsa.encrypt_private_key(message, public)
     sock.send(message)
 
@@ -67,7 +64,7 @@ def main(argv):
     response = sock.recv(2048)
     response_decrypt = rsa.decrypt_private_key(response, private)
 
-    logging.info(" code is %s" % response_decrypt.decode())
+    log.info("code is %s" % response_decrypt.decode())
 
 def exec_command_line(argv):
 	# Exit with correct return value
