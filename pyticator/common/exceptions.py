@@ -12,3 +12,8 @@ class KeyNotFound(Error):
     def __init__(self, message):
         self.message = message
 
+class ConfigFileNotFound(Error):
+    """Exception raised when config file is not found."""
+
+    def __init__(self, message):
+        self.message = message

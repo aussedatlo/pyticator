@@ -74,10 +74,12 @@ def main(argv):
     parser = argparse.ArgumentParser(argv)
     parser.add_argument("--pub_key_file", help="public key file")
     parser.add_argument("-p", "--port", help="port", type=int)
+    parser.add_argument("-c", "--config_file", help="config file",
+                    default="/etc/pyticator/pyticator.conf")
     parser.add_argument("-d", "--debug", help="debug mode",
                     action="store_true")
     args = parser.parse_args()
-    args = config_reader.get("/etc/pyticator/pyticator.conf", "server", args)
+    args = config_reader.get(args.config_file, "server", args)
 
     if args.debug != '0':
         log.setLevel(logging.DEBUG)

@@ -27,13 +27,15 @@ def main(argv):
     parser.add_argument("--priv_key_file", help="private key file")
     parser.add_argument("--pub_key_file", help="public key file")
     parser.add_argument("-p", "--port", help="port", type=int)
+    parser.add_argument("-c", "--config_file", help="config file",
+                    default="/etc/pyticator/pyticator.conf")
     parser.add_argument("-d", "--debug", help="debug mode",
         action="store_true")
     parser.add_argument("-g", "--generate", help="generate keys",
         action="store_true")
     args = parser.parse_args()
 
-    args = config_reader.get("/etc/pyticator/pyticator.conf", "client", args)
+    args = config_reader.get(args.config_file, "client", args)
 
     if args.debug != '0':
         log.setLevel(logging.DEBUG)
