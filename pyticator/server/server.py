@@ -31,6 +31,7 @@ class Server:
 
         # Get pub key
         self.key = rsa.load_key(pub_key_file)
+        log.info("Starting server")
 
     def _send_message(self, client, message):
         try:
